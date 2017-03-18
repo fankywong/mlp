@@ -1,0 +1,12 @@
+#1
+SELECT Name
+FROM Employee
+WHERE (salary > 
+       (SELECT salary 
+        FROM Employee 
+        WHERE id = (SELECT manager_id FROM Employee)))
+#2
+SELECT AVG(salary) 
+FROM Employee
+WHERE id NOT (IN (SELECT manager_id from Employee))
+
