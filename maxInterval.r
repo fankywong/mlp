@@ -8,7 +8,7 @@ maxInterval=function(subdf) {
     if(sum(indic>=i)>=i) return(i)
   }
 }
-require("data.table")
+
 df=data.frame(id=seq(10,80,by=10),anest=c("baker","baker",rep("dow",6)), start=c("08:00","09:00","09:00","08:00","10:00","12:30","13:30","18:00"),end=c("11:00","13:00","15:30","13:30","11:30","13:30","14:30","19:00"),stringsAsFactors = FALSE)
 
 anest=df$anest
