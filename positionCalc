@@ -1,0 +1,40 @@
+pos=read.csv("https://raw.githubusercontent.com/fankywong/mlp/master/pos.csv",stringsAsFactors = FALSE)
+##i.
+nettedPos=aggregate(pos$pos, by=list(user=pos$user), FUN=sum)
+##ii
+pbSymNet=aggregate(pos$pos, by=list(pb=pos$pb,sym=pos$sym), FUN=sum)
+shortname=subset(pbSymNet,x<0)$sym
+longname=subset(pbSymNet,x>0)$sym
+boxedPos=subset(pbSymNet,sym %in%shortname & sym %in% longname)
+
+trd=read.csv("https://raw.githubusercontent.com/fankywong/mlp/master/trd.csv",stringsAsFactors = FALSE)
+#iii
+trd=trd[order(trd$qty),]
+journaled=lapply(split(trd,trd$sym),function(v) {
+  jrnl=-v$qty
+  jrnl[v$qty>0]=0
+  jrnlRecord=sum(jrnl)
+  jrnlCancel=jrnl[v$qty>0]
+  if(length(jrnlCancel)>0) {
+    for(i in 1:length(jrnlCancel)) {
+      if(v$qty[v$qty>0][i]>jrnlRecord) {
+        jrnlCancel[i]=-jrnlRecord
+        break
+      } else {
+        jrnlCancel[i]=-v$qty[v$qty>0][i]
+        jrnlRecord=jrnlRecord+jrnlCancel[i]
+      }
+    } 
+  }
+  jrnl[v$qty>0]=jrnlCancel
+  return(cbind(v,jrnl))
+  })
+
+traded=lapply(journaled,function(v) {
+  trd=v$qty+v$jrnl
+  if(sum(v$qty) <= sum(trd)) trd[1]=trd[1]+sum(v$qty)-sum(trd)
+  return(cbind(v,trd))
+})
+traded=do.call(rbind,traded)
+aggregateTrade=aggregate(traded$trd,list(sym=traded$sym), FUN=sum)
+##iv###
